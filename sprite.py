@@ -3,50 +3,51 @@ import random
 
 pygame.init()
 
-SPRITE_COLOR_CHANGE_EVENT = pygame.USEREVENT + 1
-BACKGROUND_COLOR_CHANGE_EVENT = pygame.USEREVENT + 2
+screen = pygame.display.set_mode((600, 400))
+pygame.display.set_caption("Custom Event - Change Sprite Colour")
 
-BLUE = pygame.Color('blue')
-LIGHTBLUE = pygame.Color('lightblue')
-DARKBLUE = pygame.Color('darkblue')
+clock = pygame.time.Clock()
 
-YELLOW = pygame.Color('yellow')
-MAGENTA = pygame.Color('magenta')
-ORANGE = pygame.Color('orange')
-WHITE = pygame.Color('white')
+# Custom event
+CHANGE_COLOUR = pygame.USEREVENT + 1
+pygame.time.set_timer(CHANGE_COLOUR, 1000)  # every 1 second
 
 class Sprite(pygame.sprite.Sprite):
-
-    def __init__(self,color,height,width):
-
+    def __init__(self, x, y, colour):
         super().__init__()
+        self.image = pygame.Surface((80, 80))
+        self.image.fill(colour)
+        self.rect = self.image.get_rect(center=(x, y))
 
-        self.image = pygame.Surface([width,height])
-        self.image.fill(color)
+    def change_colour(self):
+        new_colour = (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255)
+        )
+        self.image.fill(new_colour)
 
-        self.rect = self.image.get_rect()
+# Create two sprites
+sprite1 = Sprite(200, 200, (255, 0, 0))
+sprite2 = Sprite(400, 200, (0, 0, 255))
 
-        self.velocity = [random.choice([-1,1]), random.choice([-1,1])]
+all_sprites = pygame.sprite.Group()
+all_sprites.add(sprite1, sprite2)
 
-        def update(self):
-            self.rect.move_ip(self.velocity)
-            boundry_hit = False
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-            if self.rect.left <= 0 or self.rect.right >= 500:
-                self.velocity[0] = - self.velocity[0]
-                boundary_hit = True
+        if event.type == CHANGE_COLOUR:
+            sprite1.change_colour()
+            sprite2.change_colour()
 
-            if self.rect.top <= 0 or self.rect.bottom >= 400:
-                self.velocity[1] = -self.velocity[1]
-                boundary_hit = True
+    screen.fill((240, 240, 240))
+    all_sprites.draw(screen)
 
-            if boundary_hit:
-                pygame.event.post(pygame.event.Event(SPRITE_COLOR_CHANGE_EVENT))
-                pygame.event.post(pygame.event.Event(BACKGROUND_COLOR_CHANGE_EVENT))
+    pygame.display.update()
+    clock.tick(60)
 
-            def update(self):
-                self.image.fill(random.choice([YELLOW,MAGENTA,ORANGE,WHITE]))
-
-            def change_background_color():
-                global bg_color
-                bg_color = random.choice([BLUE,LIGHTBLUE,DARKBLUE])
+pygame.quit()
